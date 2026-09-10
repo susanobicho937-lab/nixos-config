@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs,  ... }:
 
 {
   imports =
@@ -16,7 +16,7 @@
   zramSwap = {
   enable = true;
   algorithm = "zstd";
-  memoryPercent = 50; 
+  memoryPercent = 100; 
  }; #esto NO es el cierre de # no se # ok?
 
   # el butloader
@@ -39,6 +39,10 @@
        tree
      ];
    };
+
+  #cosas super experimentales asi bien ajuas ajuas XD
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+   
   #Programas tuyos papoi
   programs.fish.enable = true;
   programs.niri.enable = true;
@@ -53,8 +57,8 @@
     jack.enable = false;
   };
   services.libinput.enable = true;   
-  services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.wayland.enable = true;
+  services.displayManager.sddm.enable = false;
+  services.displayManager.sddm.wayland.enable = false;
   services.gvfs.enable = true;
   services.udisks2.enable = true;
   services.flatpak.enable = true; 
@@ -63,6 +67,14 @@
   #Seguridad parapapa
   security.rtkit.enable = true;
   security.polkit.enable = true;
+  security.doas.enable = true;
+  security.doas.extraRules = [
+   {
+     users = [ "wasabi" ];
+     keepEnv = true;
+     persist = true;
+   }
+  ];
 
   #Tus drivers de video hermano, o si no no juegas beamng
   hardware.graphics = {
@@ -110,8 +122,6 @@
    hyprpaper
    firefox
    screenfetch
-   noctalia-shell
-   noctalia-qs
    ghostty
    asciiquarium
    hyprcursor
@@ -120,13 +130,28 @@
    pipes
    helix
    cmatrix
-   spotify
-   spicetify-cli
    cowsay
    lolcat
    playerctl
+   btop
+   spotify
+   discord
+   rofi
+   waybar
+   jq
+   xwayland-satellite
+   libxcb-cursor
+   xsettingsd
+   gamescope
    thunar
-  ];
+   iwd
+   prismlauncher
+   docker
+   ninvaders
+   bastet
+   foot
+   hyprland
+   ];
 
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -171,6 +196,7 @@
   #
   # For more information, see `man configuration.nix` or https://nixos.org .
   system.stateVersion = "26.05"; # Did you read the comment?
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+
 
 }
+
