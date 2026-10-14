@@ -6,13 +6,34 @@
       ./hardware-configuration.nix
     ];
 
- 
+  #dwm alv
+  services.xserver = {
+    enable = true;
+    windowManager.dwm = {
+      enable = true;
+      package = pkgs.dwm.override {
+      conf = ./dwm/config.h;
+    };
+  };
+
+    displayManager.startx.enable = true;
+  };
+   
   #idk como x23
+  boot.initrd.kernelModules = [ "i915" ];
+  powerManagement.cpuFreqGovernor = "performance";
+  services.thermald.enable = true;
   programs.nix-ld.enable = true;
+ 
+
   
   #aliases
+  programs.bash.shellAliases.vi = "busybox vi";
+  programs.fish.shellAliases.vi = "busybox vi";
   programs.fish.shellAliases.ll = "ls -la";
   programs.fish.shellAliases.adios = "cowsay Te extrañare hermano!, adios.";
+  programs.fish.shellAliases.son = "poweroff";
+  programs.fish.shellAliases.sonion = "reboot";
    
   #setarangenereitor
   zramSwap = {
@@ -22,10 +43,28 @@
  }; #esto NO es el cierre de # no se # ok?
 
   # el butloader
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+   boot.loader = {
+   systemd-boot.enable = false;
+   efi.canTouchEfiVariables = true;
+   grub = {
+     enable = true;
+     efiSupport = true;
+     device = "nodev";
+    };
+  };
+  
+  boot.loader.grub.minegrub-world-sel = {
+  enable = true;
+   customIcons = [{
+     name = "nixos";
+     lineTop = "NixOS (12/10/2026, 20:00)";
+     lineBottom = "Creative Mode, Cheats, Version: 26.11";
+     imgName = "nixos";
+    }];
+  };
 
-  networking.hostName = "salsa-y-picante";
+
+  networking.hostName = "sausy-system";
 
   # neswork
   networking.networkmanager.enable = true;
@@ -33,23 +72,42 @@
   # timesone
   time.timeZone = "America/Mexico_City";
 
-  #tu usuario wasabi JAJAJA
+  #tu usuario JAJAJAJAJJAJAJAJAJA
    users.users.wasabi = {
      isNormalUser = true;
-     extraGroups = [ "wheel" "networkmanager" "audio" "video" ]; # Enable ‘sudo’ for the user.
+     extraGroups = [ "wheel" "networkmanager" "audio" "video" ]; # Enable ‘doas’ for the user.
      packages = with pkgs; [
        tree
      ];
    };
+
+   users.users.sonion = {
+     isNormalUser = true;
+     extraGroups = [ "wheel" "networkmanager" "audio" "video" ];
+     packages = with pkgs; [
+       tree
+     ];
+   };
+
 
   #cosas super experimentales asi bien ajuas ajuas XD
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
    
   #Programas tuyos papoi
   programs.fish.enable = true;
+  programs.hyprland.enable = true;
   programs.niri.enable = true;
   programs.steam.enable = true;
   programs.tmux.enable = true;
+  programs.serpantinum.enable = true;
+  programs.obs-studio = {
+  enable = true;
+  enableVirtualCamera = true; 
+  plugins = with pkgs.obs-studio-plugins; [
+    wlrobs                  
+    obs-pipewire-audio-capture
+    ];
+  };
   
   #Servicios
   services.pipewire = {
@@ -60,8 +118,6 @@
     jack.enable = false;
   };
   services.libinput.enable = true;   
-  services.displayManager.sddm.enable = false;
-  services.displayManager.sddm.wayland.enable = false;
   services.gvfs.enable = true;
   services.udisks2.enable = true;
   services.flatpak.enable = true; 
@@ -104,8 +160,7 @@
     XCURSOR_SIZE = "24";
     HYPRCURSOR_THEME = "Bibata-Modern-Classic";
     HYPRCURSOR_SIZE = "24";
-    GTK_THEME = "catppuccin-macchiato-lavender-dark";
-    XDG_DATA_DIRS = [ "${pkgs.catppuccin-gtk}/share" "${pkgs.papirus-icon-theme}/share" ];
+       XDG_DATA_DIRS = [ "${pkgs.catppuccin-gtk}/share" "${pkgs.papirus-icon-theme}/share" ];
   };
   environment.etc = {
   "X11/cursors/Bibata-Modern-Classic.theme".text = ''
@@ -121,6 +176,7 @@
     noto-fonts
     noto-fonts-color-emoji
     liberation_ttf
+    material-symbols
   ];
   fonts.fontconfig = {
     enable = true;
@@ -136,7 +192,26 @@
 
   #pacman
   environment.systemPackages = with pkgs; [
+   inputs.serpantinum.packages.${stdenv.hostPlatform.system}.default
+   grim
+   slurp
+   swappy
+   wl-clipboard
+   gpu-screen-recorder
+   fuzzel
+   cliphist
+   libnotify
+   dart-sass
+   app2unit
+   glib
+   dconf
+   gimp
+   busybox
+   vim
+   peaclock
    fastfetch
+   wayvnc
+   jq
    git 
    wget
    brightnessctl
@@ -151,11 +226,11 @@
    cmatrix
    cowsay
    lolcat
+   fetch
    playerctl
    btop
    spotify
    discord
-   rofi
    waybar
    jq
    xwayland-satellite
@@ -166,7 +241,6 @@
    prismlauncher
    ninvaders
    bastet
-   foot
    catppuccin-gtk
    papirus-icon-theme
    cargo
@@ -193,11 +267,32 @@
    wayland
    libxkbcommon
    appimage-run
-   desktop-file-utils 
+   desktop-file-utils
+   (st.overrideAttrs (old: {
+  patches = (old.patches or [ ]) ++ [ ./st/st-alpha-20240814-a0274bc.diff ];
+  postPatch = ''
+    cp ${./st/config.h} config.def.h
+  '' + old.postPatch;
+}))
+   dmenu       
+   slstatus
+   feh
+   picom
+   wezterm
    pkgs.thunar
+    matugen
+    awww
+    adw-gtk3
+    gpu-screen-recorder
+    slurp
    ] ++ [
      inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
    ];
+
+  #ya van muchos idk, ahora en espanish niputaidea
+  networking.firewall.allowedTCPPorts = [ 5900  ];
+  
+  
   programs.nix-ld.libraries = with pkgs; [
    glib gtk3 pango atk gdk-pixbuf cairo harfbuzz
    fontconfig freetype libayatana-appindicator
@@ -246,8 +341,7 @@
   # and migrated your data accordingly.
   #
   # For more information, see `man configuration.nix` or https://nixos.org .
-  system.stateVersion = "26.05"; # Did you read the comment?
+  system.stateVersion = "26.11"; # Did you read the comment?
 
 
 }
-
