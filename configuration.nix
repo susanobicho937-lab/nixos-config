@@ -6,19 +6,6 @@
       ./hardware-configuration.nix
     ];
 
-  #dwm alv
-  services.xserver = {
-    enable = true;
-    windowManager.dwm = {
-      enable = true;
-      package = pkgs.dwm.override {
-      conf = ./dwm/config.h;
-    };
-  };
-
-    displayManager.startx.enable = true;
-  };
-   
   #idk como x23
   boot.initrd.kernelModules = [ "i915" ];
   powerManagement.cpuFreqGovernor = "performance";
@@ -75,7 +62,8 @@
   #tu usuario JAJAJAJAJJAJAJAJAJA
    users.users.wasabi = {
      isNormalUser = true;
-     extraGroups = [ "wheel" "networkmanager" "audio" "video" ]; # Enable ‘doas’ for the user.
+     extraGroups = [ "wheel" "networkmanager" "audio" "video" ]; # Enable ‘doas’ for the user
+     shell = pkgs.fish;
      packages = with pkgs; [
        tree
      ];
@@ -94,6 +82,8 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
    
   #Programas tuyos papoi
+  programs.gpu-screen-recorder.enable = true;
+  programs.zsh.enable = true;
   programs.fish.enable = true;
   programs.hyprland.enable = true;
   programs.niri.enable = true;
@@ -106,6 +96,15 @@
   plugins = with pkgs.obs-studio-plugins; [
     wlrobs                  
     obs-pipewire-audio-capture
+    ];
+  };
+
+  #equidege
+  xdg.portal = {
+  enable = true;
+  extraPortals = [
+     pkgs.xdg-desktop-portal-gnome    
+     pkgs.xdg-desktop-portal-hyprland   
     ];
   };
   
@@ -129,6 +128,7 @@
   #Seguridad parapapa
   security.rtkit.enable = true;
   security.polkit.enable = true;
+  security.sudo.enable = false;
   security.doas.enable = true;
   security.doas.extraRules = [
    {
@@ -154,6 +154,7 @@
   programs.dconf.enable = true;
   
   #variables de sesion de alch no se que
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "iHD";
     XCURSOR_THEME = "Bibata-Modern-Classic";
@@ -193,6 +194,9 @@
   #pacman
   environment.systemPackages = with pkgs; [
    inputs.serpantinum.packages.${stdenv.hostPlatform.system}.default
+   onlyoffice-desktopeditors
+   tor-browser
+   quickshell
    grim
    slurp
    swappy
@@ -209,15 +213,14 @@
    busybox
    vim
    peaclock
-   fastfetch
    wayvnc
    jq
    git 
    wget
+   fetch
    brightnessctl
    firefox
    screenfetch
-   asciiquarium
    hyprcursor
    bibata-cursors
    cava
@@ -237,7 +240,6 @@
    libxcb-cursor
    xsettingsd
    gamescope
-   thunar
    prismlauncher
    ninvaders
    bastet
@@ -261,33 +263,21 @@
    libXi
    libglvnd
    alsa-lib                
-   fontconfig
-   freetype
-   libayatana-appindicator   
-   wayland
-   libxkbcommon
-   appimage-run
-   desktop-file-utils
-   (st.overrideAttrs (old: {
-  patches = (old.patches or [ ]) ++ [ ./st/st-alpha-20240814-a0274bc.diff ];
-  postPatch = ''
-    cp ${./st/config.h} config.def.h
-  '' + old.postPatch;
-}))
-   dmenu       
-   slstatus
-   feh
-   picom
-   wezterm
-   pkgs.thunar
+    fontconfig
+    freetype
+    libayatana-appindicator   
+    wayland
+    libxkbcommon
+    appimage-run
+    desktop-file-utils
+    slstatus
+    picom
     matugen
     awww
     adw-gtk3
     gpu-screen-recorder
     slurp
-   ] ++ [
-     inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
-   ];
+    ];
 
   #ya van muchos idk, ahora en espanish niputaidea
   networking.firewall.allowedTCPPorts = [ 5900  ];
@@ -311,7 +301,7 @@
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+   services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
